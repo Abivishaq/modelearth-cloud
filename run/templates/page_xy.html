@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Run Models</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .container {
+            text-align: center;
+            margin-top: 50px;
+        }
+        input[type="number"] {
+            padding: 10px;
+            font-size: 16px;
+            width: 80px;
+            margin: 5px;
+        }
+        button {
+            background-color: #4CAF50;
+            border: none;
+            color: white;
+            padding: 15px 32px;
+            font-size: 16px;
+            margin: 10px;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+        #status {
+            margin-top: 20px;
+            padding: 10px;
+            border-radius: 4px;
+        }
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Run Models</h1>
+        <p>Enter values for <strong>x</strong> and <strong>y</strong> below:</p>
+        <input type="number" id="xValue" placeholder="x">
+        <input type="number" id="yValue" placeholder="y">
+        <br>
+        <button id="runButton">Run Notebook</button>
+        <div id="status" style="display: none;"></div>
+    </div>
+
+    <script>
+        document.getElementById('runButton').addEventListener('click', function () {
+            const button = this;
+            const status = document.getElementById('status');
+            const x = parseInt(document.getElementById('xValue').value);
+            const y = parseInt(document.getElementById('yValue').value);
+
+            button.disabled = true;
+            button.textContent = 'Processing...';
+            status.style.display = 'none';
+
+            fetch('/run-notebook', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ x: x, y: y })
+            })
+                .then(response => response.json())
+                .then(data => {
+                    button.disabled = false;
+                    button.textContent = 'Run Notebook';
+                    status.style.display = 'block';
+
+                    if (data.status === 'success') {
+                        status.className = 'success';
+                        status.textContent = 'Notebook executed successfully!';
+                    } else {
+                        status.className = 'error';
+                        status.textContent = 'Error: ' + data.message;
+                    }
+                })
+                .catch(error => {
+                    button.disabled = false;
+                    button.textContent = 'Run Notebook';
+                    status.style.display = 'block';
+                    status.className = 'error';
+                    status.textContent = 'Error: ' + error.message;
+                });
+        });
+    </script>
+</body>
+</html>

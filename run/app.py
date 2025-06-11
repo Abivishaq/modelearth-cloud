@@ -16,14 +16,20 @@ import time
 app = Flask(__name__)
 
 # Configuration
-SOURCE_REPO_URL = "https://github.com/username/source-repo.git"
-TARGET_REPO = "datascape/RealityStream2025"
-NOTEBOOK_PATH = "path/to/notebook.ipynb"
+SOURCE_REPO_URL = "https://github.com/Abivishaq/modelearth-notebook.git"
+# TARGET_REPO = "datascape/RealityStream2025"
+TARGET_REPO = "Abivishaq/modelearth-notebook-results"
+NOTEBOOK_PATH = "notebook.ipynb"
 
 
 
 # Get the GitHub token from Secret Manager
 def get_github_token():
+    # key = os.environ.get('GITHUB_KEY_MODELEARTH', None)
+    # if key:
+    #     return key
+    # else:
+    #     raise ValueError("GITHUB_KEY_MODELEARTH environment variable not set")
     client = secretmanager.SecretManagerServiceClient()
     name = f"projects/{os.environ.get('GOOGLE_CLOUD_PROJECT')}/secrets/github-token/versions/latest"
     response = client.access_secret_version(request={"name": name})
@@ -133,13 +139,12 @@ def upload_reports_to_github(repo, token, report_path, branch='main', commit_mes
 
 @app.route('/')
 def home():
-    return render_template('page.html')
+    return render_template('page_xy.html')
 
 @app.route('/run-notebook', methods=['POST'])
 def run_notebook():
     try:
         # Create a temporary directory
-        # clean report directory
         with tempfile.TemporaryDirectory() as temp_dir:
             # Clone the source repository
             repo = git.Repo.clone_from(SOURCE_REPO_URL, temp_dir)
@@ -149,13 +154,16 @@ def run_notebook():
             # Path to the notebook in the cloned repo
             notebook_file = os.path.join(temp_dir, NOTEBOOK_PATH)
             
-
+            # parameters for the notebook
+            parameters = request.get_json()
+            if not parameters:
+                parameters = {}
             # Execute the notebook
             output_path = os.path.join(reports_dir, 'output.ipynb')
             pm.execute_notebook(
                 notebook_file,
                 output_path,
-                parameters={"reports_dir":reports_dir}
+                parameters={"reports_dir":reports_dir, "parameters": parameters}
             )
             
             # Read the executed notebook
