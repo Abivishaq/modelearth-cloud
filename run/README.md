@@ -44,19 +44,26 @@ TO DO: Let's add a form here where users can enter their Google ProjectID, GitHu
 Let's also creat deployment cmds for [Thundercompute.com](https://www.thundercompute.com)
 
 
-Open a terminal in the folder where your site will reside.
+Initialize gcloud - Open a terminal in the folder where your site will reside. (For example: cloud/run/site)
+Optionally, skip diagnostics during init.
 
-```bash
-# Install Google Cloud SDK if not already installed
-# https://cloud.google.com/sdk/docs/install
+    gcloud init --skip-diagnostics
 
-# Initialize gcloud - (2) Create a new configuration, or (1 or 3) use existing.
-gcloud init
 
-# If you add a new configuration, you may want to name if different from the project.
-```
+[Install Google Cloud SDK](https://cloud.google.com/sdk/docs/install) if not already installed
 
-modelearth-config
+If you're returning, choose #3:
+3. Switch to and re-initialize existing configuration: [default]
+Choose which gmail account (if you have more than 1) - Figure out a cmd to choose all defaults.
+Pick the cloud project to use.
+
+(1) Re-initialize with new setting.
+(2) Create a new configuration
+(3) Switch to and re-initialize existing configuration
+
+If you add a new configuration, name the configuration different from the project.
+
+<!-- modelearth-config -->
 
 You'll be prompted to create a project and it will be set as active.
 Here are the equivalent commands;
@@ -73,10 +80,6 @@ You'll likely be advised to update Google Cloud CLI components by running:
 
     gcloud components update
 
-If you're returning, choose #3:
-3. Switch to and re-initialize existing configuration: [default]
-Choose which gmail account (if you have more than 1) - Maybe we could use a comd to choose all defaults.
-Pick the cloud project to use.
 
 **If this is your initial setup, get your billing account ID**
 
@@ -105,6 +108,10 @@ Enable required APIs (if first time)
 
 ## Part 2: Create GitHub Access Token
 
+Check if you already added the token in GCloud
+
+    gcloud secrets describe github-token
+
 1. In your [GitHub account](https://github.com), navigate to Settings (upper right menu)
 2. Navigate to Developer settings (lower left) > Personal access tokens. Choose Fine-grained tokens.
 3. Create a new Fine-grained token so you can limit to one repo.
@@ -116,7 +123,10 @@ Metadata: Read-only (gets set automatically)
 
 ## Part 3: Store GitHub Token in Secret Manager
 
-The token's name will be: github-token 
+Commands for [Storing a GitHub Token in Secret Manager](../../localsite/start/steps/github-token) to share
+
+We named the token: github-token-run-models-1
+
 <!-- Since this is account-wide, let's call it github-token-modelearth-run-models 
 TO DO: This will need to get sent into Run-Models-bkup.ipynb as a variable.
 -->
@@ -131,8 +141,10 @@ gcloud secrets add-iam-policy-binding github-token \
     --role="roles/secretmanager.secretAccessor"
 ```
 
+
 ## Part 4: Create Flask Application
 
+[Review this flask info from Prem](https://github.com/ModelEarth/cloud/tree/main/cloud-main/flask), and anything useful as you 
 Create a directory for your project and set up the following files:
 
 ### `Dockerfile`
